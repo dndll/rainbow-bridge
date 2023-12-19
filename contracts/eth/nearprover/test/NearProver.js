@@ -16,21 +16,24 @@ beforeEach(async function () {
 });
 
 async function testProof(merkleRoot, height, proofPath) {
-    let proof = require(proofPath);
-    console.log(computeMerkleRoot(proof).toString('hex'));
-    expect(merkleRoot === '0x' + computeMerkleRoot(proof).toString('hex')).to.be.true;
-    proof = borshifyOutcomeProof(proof);
+    const path = require("path");
+    const fs = require('fs');
+
+    const proof = '0x' + await fs.readFileSync(path.resolve(__dirname, proofPath)).toString().replaceAll("\n", "");
+    console.log('Executing root', merkleRoot, 'height', height);
+
     await NearBridgeMock.setBlockMerkleRoot(height, merkleRoot);
     expect(await NearProver.proveOutcome(proof, height)).to.be.true;
 }
 
 it('should be ok', async function () {
-    await testProof('0x22f00dd154366d758cd3e4fe81c1caed8e0db6227fe4b2b52a8e5a468aa0a723', 498, './proof2.json');
-    await testProof('0x0d0776820a9a81481a559c36fd5d69c33718fb7d7fd3be7564a446e043e2cb35', 1705, './proof3.json');
-    await testProof('0x1f7129496c461c058fb3daf258d89bf7dacb4efad5742351f66098a00bb6fa53', 5563, './proof4.json');
-    await testProof('0xa9cd8eb4dd92ba5f2fef47d68e1d73ac8c57047959f6f8a2dcc664419e74e4b8', 384, './proof5.json');
-    await testProof('0xcc3954a51b7c1a86861df8809f79c2bf839741e3e380e28360b8b3970a5d90bd', 377, './proof6.json');
-    await testProof('0x8298c9cd1048df03e9ccefac4b022636a30a2f7e6a8c33cc4104901b92e08dfd', 93700915, './proof7.json');
+    await testProof('0x22f00dd154366d758cd3e4fe81c1caed8e0db6227fe4b2b52a8e5a468aa0a723', 498, './proof2.hex', );
+    await testProof('0x0d0776820a9a81481a559c36fd5d69c33718fb7d7fd3be7564a446e043e2cb35', 1705, './proof3.hex', );
+    await testProof('0x1f7129496c461c058fb3daf258d89bf7dacb4efad5742351f66098a00bb6fa53', 5563, './proof4.hex');
+    await testProof('0xa9cd8eb4dd92ba5f2fef47d68e1d73ac8c57047959f6f8a2dcc664419e74e4b8', 384, './proof5.hex');
+    await testProof('0xcc3954a51b7c1a86861df8809f79c2bf839741e3e380e28360b8b3970a5d90bd', 377, './proof6.hex');
+    await testProof('0x8298c9cd1048df03e9ccefac4b022636a30a2f7e6a8c33cc4104901b92e08dfd', 93700915, './proof7.hex');
+    await testProof('0x078f987e29655eae4abcd21a325701f29e25b0d95ea2b8424f5d44aca71e8421', 10000, './batched.hex');
 });
 
 if (process.env['NEAR_PROOFS_DIR']) {
